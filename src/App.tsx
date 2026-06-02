@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
+import { Hero } from "@/components/sections/Hero";
 
 function App() {
   return (
@@ -7,13 +8,7 @@ function App() {
       <div className="min-h-screen bg-background text-foreground">
         <Navbar />
         <main>
-          {/* Sections will go here */}
-          <section id="home" className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-              <h1 className="text-5xl font-bold mb-4">Hello, I'm <span className="text-primary">Your Name</span></h1>
-              <p className="text-xl text-muted-foreground">Full Stack Developer</p>
-            </div>
-          </section>
+          <Hero />
           
           <section id="projects" className="min-h-screen py-20">
             <div className="max-w-6xl mx-auto px-4">
