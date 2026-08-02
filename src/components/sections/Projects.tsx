@@ -1,88 +1,75 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink } from "lucide-react";
-import { FaGithub } from "react-icons/fa";
+import { FaGithub as Github } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 interface Project {
-  id: number;
+  id: string;
   title: string;
   description: string;
   tags: string[];
-  githubUrl?: string;
-  liveUrl?: string;
-  image?: string; // Added image property
+  github_url?: string;
+  live_url?: string;
+  image_url?: string;
+  featured: boolean;
 }
 
-const projects: Project[] = [
-  {
-    id: 1,
-    title: "E-Commerce Platform",
-    description: "Full-stack e-commerce solution with shopping cart, user authentication, and payment integration.",
-    tags: ["React", "Node.js", "MongoDB", "Tailwind"],
-    githubUrl: "https://github.com/yourusername/ecommerce",
-    liveUrl: "https://ecommerce-demo.com",
-    image: "https://via.placeholder.com/300x200",
-  },
-  {
-    id: 2,
-    title: "Task Management App",
-    description: "Productivity app with drag-and-drop, real-time updates, and team collaboration features.",
-    tags: ["React", "TypeScript", "Express", "PostgreSQL"],
-    githubUrl: "https://github.com/yourusername/taskmanager",
-    liveUrl: "https://taskmanager-demo.com",
-    image: "https://via.placeholder.com/300x200",
-  },
-  {
-    id: 3,
-    title: "Portfolio Website",
-    description: "Modern portfolio website with dark mode, animations, and responsive design.",
-    tags: ["React", "Tailwind", "Framer Motion"],
-    githubUrl: "https://github.com/yourusername/portfolio",
-    liveUrl: "https://yourportfolio.com",
-    image: "https://via.placeholder.com/300x200",
-  },
-  {
-    id: 4,
-    title: "Weather Dashboard",
-    description: "Real-time weather app with 5-day forecast, interactive maps, and location detection.",
-    tags: ["React", "API", "Chart.js", "CSS"],
-    githubUrl: "https://github.com/yourusername/weather",
-    liveUrl: "https://weather-demo.com",
-    image: "https://via.placeholder.com/300x200",
-  },
-  {
-    id: 5,
-    title: "Social Media Dashboard",
-    description: "Analytics dashboard for social media metrics with data visualization and reports.",
-    tags: ["React", "D3.js", "Firebase", "Tailwind"],
-    githubUrl: "https://github.com/yourusername/social-dashboard",
-    liveUrl: "https://social-demo.com",
-    image: "https://via.placeholder.com/300x200",
-  },
-  {
-    id: 6,
-    title: "AI Image Generator",
-    description: "Generate unique images using AI with prompt engineering and gallery features.",
-    tags: ["React", "OpenAI API", "Node.js", "MongoDB"],
-    githubUrl: "https://github.com/yourusername/ai-generator",
-    liveUrl: "https://ai-generator-demo.com",
-    image: "https://via.placeholder.com/300x200",
-  },
-];
-
 export const Projects = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
   const [filter, setFilter] = useState<string>("All");
-  
-  // Get unique tags from all projects
-  const allTags = ["All", ...new Set(projects.flatMap(p => p.tags))];
-  
-  // Filter projects based on selected tag
+  const [loading, setLoading] = useState(true);
+  const [allTags, setAllTags] = useState<string[]>(["All"]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('featured', { ascending: false })
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      if (data) {
+        setProjects(data);
+        // Extract unique tags
+        const tags = new Set<string>();
+        data.forEach(project => {
+          project.tags?.forEach((tag: string) => tags.add(tag));
+        });
+        setAllTags(["All", ...Array.from(tags).sort()]);
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      toast.error("Failed to load projects");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredProjects = filter === "All" 
     ? projects 
-    : projects.filter(p => p.tags.includes(filter));
+    : projects.filter(p => p.tags?.includes(filter));
+
+  if (loading) {
+    return (
+      <section id="projects" className="py-20 px-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading projects...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="projects" className="py-20 px-4">
@@ -101,84 +88,98 @@ export const Projects = () => {
         </motion.div>
 
         {/* Filter Buttons */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          viewport={{ once: true }}
-          className="flex flex-wrap gap-2 justify-center mb-12"
-        >
-          {allTags.map(tag => (
-            <Button
-              key={tag}
-              variant={filter === tag ? "default" : "outline"}
-              onClick={() => setFilter(tag)}
-              size="sm"
-              className="transition-all"
-            >
-              {tag}
-            </Button>
-          ))}
-        </motion.div>
+        {allTags.length > 1 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="flex flex-wrap gap-2 justify-center mb-12"
+          >
+            {allTags.map(tag => (
+              <Button
+                key={tag}
+                variant={filter === tag ? "default" : "outline"}
+                onClick={() => setFilter(tag)}
+                size="sm"
+                className="transition-all"
+              >
+                {tag}
+              </Button>
+            ))}
+          </motion.div>
+        )}
 
         {/* Projects Grid */}
-        <motion.div 
-          layout
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {filteredProjects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <Card className="h-full flex flex-col hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden">
-                {/* Project Image */}
-                {project.image && (
-                  <div className="w-full h-48 overflow-hidden">
-                    <img 
-                      src={project.image} 
-                      alt={project.title}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle>{project.title}</CardTitle>
-                  <CardDescription>{project.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="flex flex-wrap gap-2">
-                    {project.tags.map(tag => (
-                      <Badge key={tag} variant="secondary">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-                <CardFooter className="gap-4">
-                  {project.githubUrl && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
-                        <FaGithub className="mr-2 h-4 w-4" /> Code
-                      </a>
-                    </Button>
+        {filteredProjects.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No projects found in this category.</p>
+          </div>
+        ) : (
+          <motion.div 
+            layout
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredProjects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card className="h-full flex flex-col hover:shadow-lg transition-all hover:-translate-y-1">
+                  {project.image_url && (
+                    <div className="w-full h-48 overflow-hidden rounded-t-lg">
+                      <img 
+                        src={project.image_url} 
+                        alt={project.title}
+                        className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+                      />
+                    </div>
                   )}
-                  {project.liveUrl && (
-                    <Button size="sm" asChild>
-                      <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="mr-2 h-4 w-4" /> Live Demo
-                      </a>
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+                  <CardHeader>
+                    <CardTitle>{project.title}</CardTitle>
+                    <CardDescription className="line-clamp-3">
+                      {project.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <div className="flex flex-wrap gap-2">
+                      {project.tags?.slice(0, 4).map(tag => (
+                        <Badge key={tag} variant="secondary">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {project.tags?.length > 4 && (
+                        <Badge variant="secondary">
+                          +{project.tags.length - 4}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                  <CardFooter className="gap-4">
+                    {project.github_url && (
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={project.github_url} target="_blank" rel="noopener noreferrer">
+                          <Github className="mr-2 h-4 w-4" /> Code
+                        </a>
+                      </Button>
+                    )}
+                    {project.live_url && (
+                      <Button size="sm" asChild>
+                        <a href={project.live_url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="mr-2 h-4 w-4" /> Live Demo
+                        </a>
+                      </Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   );

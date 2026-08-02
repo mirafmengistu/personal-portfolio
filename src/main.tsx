@@ -1,10 +1,15 @@
-import { StrictMode } from 'react'
+import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
+import { LoadingSpinner } from './components/common/LoadingSpinner'
+
+// Lazy load App for better performance
+const App = lazy(() => import('./App'))
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <Suspense fallback={<LoadingSpinner />}>
+      <App />
+    </Suspense>
   </StrictMode>,
 )

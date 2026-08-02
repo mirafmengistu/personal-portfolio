@@ -1,28 +1,59 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { Navbar } from "@/components/layout/Navbar";
-import { Hero } from "@/components/sections/Hero";
-import { Projects } from "@/components/sections/Projects";
-import { Skills } from "@/components/sections/Skills";
+import { Toaster } from "sonner";
+import { AdminLogin } from "@/pages/AdminLogin";
+import { ResetPassword } from "@/pages/admin/ResetPassword"; // Make sure this is imported
+import { AdminLayout } from "@/pages/admin/AdminLayout";
+import { Dashboard } from "@/pages/admin/Dashboard";
+import { ProfileEditor } from "@/pages/admin/ProfileEditor";
+import { ProjectsManager } from "@/pages/admin/ProjectsManager";
+import { SkillsManager } from "@/pages/admin/SkillsManager";
+import { ContactEditor } from "@/pages/admin/ContactEditor";
+import { HeroEditor } from "@/pages/admin/HeroEditor";
+import { FooterEditor } from "@/pages/admin/FooterEditor";
+import MainPortfolio from "./MainPortfolio";
+
+// Protected route wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const isAuthenticated = localStorage.getItem("adminAuthenticated") === "true";
+  return isAuthenticated ? children : <Navigate to="/admin" />;
+};
 
 function App() {
   return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-background text-foreground">
-        <Navbar />
-        <main>
-          <Hero />
-          <Projects />
-          <Skills />
+    <BrowserRouter>
+      <ThemeProvider>
+        <Toaster position="top-right" />
+        <Routes>
+          {/* Main Portfolio Route */}
+          <Route path="/" element={<MainPortfolio />} />
           
-          <section id="contact" className="min-h-screen py-20">
-            <div className="max-w-6xl mx-auto px-4">
-              <h2 className="text-3xl font-bold text-center">Contact</h2>
-              <p className="text-center text-muted-foreground mt-2">Coming soon...</p>
-            </div>
-          </section>
-        </main>
-      </div>
-    </ThemeProvider>
+          {/* Admin Login Route */}
+          <Route path="/admin" element={<AdminLogin />} />
+          
+          {/* Admin Reset Password Route - Make sure this is BEFORE the login route */}
+          <Route path="/admin/reset-password" element={<ResetPassword />} />
+          
+          {/* Admin Dashboard with Nested Routes */}
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="profile" element={<ProfileEditor />} />
+            <Route path="projects" element={<ProjectsManager />} />
+            <Route path="skills" element={<SkillsManager />} />
+            <Route path="contact" element={<ContactEditor />} />
+            <Route path="hero" element={<HeroEditor />} />
+            <Route path="footer" element={<FooterEditor />} />
+          </Route>
+        </Routes>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }
 
