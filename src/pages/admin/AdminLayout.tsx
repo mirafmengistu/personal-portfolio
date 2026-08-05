@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, 
-  User, 
-  FolderGit2, 
-  Code2, 
-  Mail as MailIcon, 
+import {
+  LayoutDashboard,
+  User,
+  FolderGit2,
+  Code2,
+  Mail as MailIcon,
   Palette,
   LogOut,
   Menu,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { FaFacebook } from "react-icons/fa";
 import { toast } from "sonner";
@@ -34,18 +34,20 @@ export const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Check if mobile on mount and resize
+  // Use the same breakpoint as Tailwind's `lg` (1024px)
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 768;
+      const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
-      if (mobile) {
-        setIsSidebarOpen(false);
-      } else {
+
+      // Desktop → open by default, Mobile → closed by default
+      if (!mobile) {
         setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
       }
     };
-    
+
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -57,18 +59,13 @@ export const AdminLayout = () => {
     navigate("/admin");
   };
 
-  // Check if link is active
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
+  const isActive = (path: string) => location.pathname === path;
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile Header */}
+      {/* Mobile Header – only visible below lg */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b border-border px-4 h-16 flex items-center justify-between">
         <Button
           variant="ghost"
@@ -91,7 +88,7 @@ export const AdminLayout = () => {
         </Button>
       </header>
 
-      {/* Overlay for mobile */}
+      {/* Mobile overlay */}
       {isMobile && isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -104,35 +101,39 @@ export const AdminLayout = () => {
       <aside
         className={cn(
           "fixed left-0 top-0 z-50 h-full bg-card border-r border-border transition-all duration-300 ease-in-out",
-          "lg:translate-x-0",
-          isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-full w-64",
-          isMobile && isSidebarOpen && "shadow-xl"
+          // Width
+          isSidebarOpen ? "w-64" : "w-16",
+          // Mobile: slide in/out
+          isMobile
+            ? isSidebarOpen
+              ? "translate-x-0 shadow-xl"
+              : "-translate-x-full"
+            : "translate-x-0"
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Logo */}
+          {/* Logo + toggle */}
           <div className="flex h-16 items-center justify-between px-4 border-b">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 overflow-hidden">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
                 <span className="text-primary-foreground font-bold text-sm">P</span>
               </div>
-              <h1 className="text-xl font-bold hidden lg:block">Portfolio Admin</h1>
-              <h1 className="text-xl font-bold lg:hidden">Admin</h1>
+              <span
+                className={cn(
+                  "text-xl font-bold transition-opacity duration-300 whitespace-nowrap",
+                  isSidebarOpen ? "opacity-100" : "opacity-0 w-0"
+                )}
+              >
+                Admin
+              </span>
             </div>
+
+            {/* Desktop collapse button */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleSidebar}
-              className="h-8 w-8 lg:hidden"
-              aria-label="Close menu"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="h-8 w-8 hidden lg:flex"
+              className="h-8 w-8 hidden lg:flex flex-shrink-0"
               aria-label="Toggle sidebar"
             >
               {isSidebarOpen ? (
@@ -141,6 +142,17 @@ export const AdminLayout = () => {
                 <ChevronRight className="h-4 w-4" />
               )}
             </Button>
+
+            {/* Mobile close button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="h-8 w-8 lg:hidden flex-shrink-0"
+              aria-label="Close menu"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
 
           {/* Navigation */}
@@ -148,6 +160,7 @@ export const AdminLayout = () => {
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
+
               return (
                 <Link
                   key={item.path}
@@ -156,35 +169,57 @@ export const AdminLayout = () => {
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all",
                     "hover:bg-secondary hover:text-foreground",
-                    active 
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                      : "text-muted-foreground"
+                    active
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "text-muted-foreground",
+                    !isSidebarOpen && "justify-center px-2"
                   )}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <span
+                    className={cn(
+                      "text-sm font-medium transition-opacity duration-200 whitespace-nowrap",
+                      isSidebarOpen ? "opacity-100" : "opacity-0 w-0"
+                    )}
+                  >
+                    {item.label}
+                  </span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* Footer */}
+          {/* Footer actions */}
           <div className="border-t p-4 space-y-2">
             <Button
               variant="outline"
               size="sm"
-              className="w-full"
-              onClick={() => window.open('/', '_blank')}
+              className={cn("w-full", !isSidebarOpen && "px-2")}
+              onClick={() => window.open("/", "_blank")}
             >
-              View Portfolio
+              <span className={cn("truncate", !isSidebarOpen && "hidden")}>
+                View Portfolio
+              </span>
+              {!isSidebarOpen && <span className="text-xs">👁️</span>}
             </Button>
+
             <Button
               variant="ghost"
-              className="w-full justify-start gap-3 text-red-500 hover:text-red-600 hover:bg-red-50"
+              className={cn(
+                "w-full justify-start gap-3 text-red-500 hover:text-red-600 hover:bg-red-50",
+                !isSidebarOpen && "justify-center px-2"
+              )}
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4 flex-shrink-0" />
-              <span>Logout</span>
+              <span
+                className={cn(
+                  "transition-opacity duration-200",
+                  isSidebarOpen ? "opacity-100" : "opacity-0 w-0"
+                )}
+              >
+                Logout
+              </span>
             </Button>
           </div>
         </div>
@@ -193,13 +228,14 @@ export const AdminLayout = () => {
       {/* Main Content */}
       <main
         className={cn(
-          "transition-all duration-300",
-          "lg:ml-64",
-          isMobile ? "pt-16" : "",
-          !isSidebarOpen && "lg:ml-0"
+          "min-h-screen transition-all duration-300",
+          // Mobile: space for fixed header
+          "pt-16 lg:pt-0",
+          // Desktop: push content so it never sits under the sidebar
+          isSidebarOpen ? "lg:ml-64" : "lg:ml-16"
         )}
       >
-        <div className="min-h-screen p-4 md:p-6 lg:p-8">
+        <div className="p-4 md:p-6 lg:p-8">
           <Outlet />
         </div>
       </main>

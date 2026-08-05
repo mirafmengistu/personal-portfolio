@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
 import { AdminLogin } from "@/pages/AdminLogin";
-import { ResetPassword } from "@/pages/admin/ResetPassword"; // Make sure this is imported
+import { ResetPassword } from "@/pages/admin/ResetPassword";
 import { AdminLayout } from "@/pages/admin/AdminLayout";
 import { Dashboard } from "@/pages/admin/Dashboard";
 import { ProfileEditor } from "@/pages/admin/ProfileEditor";
@@ -25,16 +25,14 @@ function App() {
       <ThemeProvider>
         <Toaster position="top-right" />
         <Routes>
-          {/* Main Portfolio Route */}
+          {/* Main Portfolio Route - Without any wrappers */}
           <Route path="/" element={<MainPortfolio />} />
           
-          {/* Admin Login Route */}
+          {/* Admin Routes - Keep them separate */}
           <Route path="/admin" element={<AdminLogin />} />
-          
-          {/* Admin Reset Password Route - Make sure this is BEFORE the login route */}
           <Route path="/admin/reset-password" element={<ResetPassword />} />
           
-          {/* Admin Dashboard with Nested Routes */}
+          {/* Protected Admin Routes */}
           <Route 
             path="/admin/dashboard" 
             element={

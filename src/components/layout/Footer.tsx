@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Heart, Mail, ArrowUp, Sparkles, Link2, Code2 } from "lucide-react";
+import { Heart, Mail, ArrowUp, Link2, Code2 } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
@@ -38,8 +38,6 @@ export const Footer = () => {
         .select('*')
         .single();
       
-      console.log("Footer settings:", footerSettings); // Debug log
-      
       if (footerError) {
         console.error("Footer error:", footerError);
       }
@@ -66,11 +64,9 @@ export const Footer = () => {
       }
       
       // Fetch social links
-      const { data: socialData, error: socialError } = await supabase
+      const { data: socialData } = await supabase
         .from('social_links')
         .select('*');
-      
-      console.log("Social links:", socialData); // Debug log
       
       if (socialData) {
         setSocialLinks(socialData);
