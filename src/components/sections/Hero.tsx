@@ -152,35 +152,48 @@ export const Hero = () => {
     >
       {/* ========== CINEMATIC BACKGROUND ========== */}
       <div className="absolute inset-0 -z-10">
-        {/* Photo as background (blurred + darkened) */}
         {profile?.avatar_url && (
           <img
             src={profile.avatar_url}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-center scale-110 opacity-40 dark:opacity-30"
+            className="absolute inset-0 w-full h-full object-cover object-center scale-110 opacity-30 dark:opacity-25"
           />
         )}
-
-        {/* Strong cinematic overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
-        <div className="absolute inset-0 bg-background/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/70" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-24 lg:py-0">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center min-h-[80vh]">
+      <div className="relative max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20 lg:py-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-8 items-center min-h-[80vh]">
           
           {/* ========== LEFT CONTENT ========== */}
-          <div className="space-y-8 text-center lg:text-left z-10">
+          <div className="space-y-7 text-center lg:text-left z-10 order-2 lg:order-1">
+            
+            {/* Mobile Photo (visible only on small screens) */}
+            {profile?.avatar_url && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="flex justify-center lg:hidden mb-2"
+              >
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.name || "Profile photo"}
+                  className="w-40 h-40 sm:w-48 sm:h-48 object-cover rounded-full border-4 border-background shadow-2xl"
+                />
+              </motion.div>
+            )}
+
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
             >
-              <p className="text-primary font-medium tracking-[0.2em] text-sm uppercase mb-4">
+              <p className="text-primary font-medium tracking-[0.2em] text-sm uppercase mb-3">
                 {heroData?.greeting || "Hi, I'm"}
               </p>
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.05]">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
                 {profile?.name || "Your Name"}
               </h1>
             </motion.div>
@@ -190,17 +203,17 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="h-12 flex items-center justify-center lg:justify-start"
+              className="h-11 flex items-center justify-center lg:justify-start"
             >
               {heroData?.enable_animated_text &&
               heroData?.animated_texts &&
               heroData.animated_texts.length > 0 ? (
-                <h2 className="text-2xl sm:text-3xl text-muted-foreground font-medium">
+                <h2 className="text-xl sm:text-2xl md:text-3xl text-muted-foreground font-medium">
                   {displayText}
-                  <span className="inline-block w-0.5 h-6 sm:h-7 bg-primary ml-1.5 animate-pulse" />
+                  <span className="inline-block w-0.5 h-5 sm:h-6 bg-primary ml-1.5 animate-pulse" />
                 </h2>
               ) : (
-                <h2 className="text-2xl sm:text-3xl text-muted-foreground">
+                <h2 className="text-xl sm:text-2xl md:text-3xl text-muted-foreground">
                   {heroData?.animated_texts?.[0] || "Full Stack Developer"}
                 </h2>
               )}
@@ -211,7 +224,7 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 leading-relaxed"
+              className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 leading-relaxed"
             >
               {profile?.bio ||
                 "Building exceptional digital experiences with modern web technologies."}
@@ -222,9 +235,9 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
-              className="flex flex-wrap gap-4 justify-center lg:justify-start"
+              className="flex flex-wrap gap-3 justify-center lg:justify-start"
             >
-              <Button size="lg" asChild className="min-w-[150px] h-12 text-base">
+              <Button size="lg" asChild className="min-w-[140px] h-11">
                 <a href={heroData?.primary_cta_link || "#projects"}>
                   {heroData?.primary_cta || "View Projects"}
                 </a>
@@ -234,7 +247,7 @@ export const Hero = () => {
                 size="lg"
                 variant="outline"
                 asChild
-                className="min-w-[150px] h-12 text-base border-muted-foreground/30 hover:bg-background/50"
+                className="min-w-[140px] h-11"
               >
                 <a href={heroData?.secondary_cta_link || "#contact"}>
                   {heroData?.secondary_cta || "Contact Me"}
@@ -245,7 +258,7 @@ export const Hero = () => {
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="h-12"
+                  className="h-11"
                   onClick={() =>
                     downloadFile(
                       profile.resume_url!,
@@ -265,7 +278,7 @@ export const Hero = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.4 }}
-                className="flex gap-6 justify-center lg:justify-start pt-2"
+                className="flex gap-5 justify-center lg:justify-start pt-1"
               >
                 {socialLinks.map((link, index) => {
                   if (link.platform === "github") {
@@ -278,7 +291,7 @@ export const Hero = () => {
                         className="text-muted-foreground hover:text-primary transition-colors"
                         aria-label="GitHub"
                       >
-                        <Github size={24} />
+                        <Github size={22} />
                       </a>
                     );
                   }
@@ -292,7 +305,7 @@ export const Hero = () => {
                         className="text-muted-foreground hover:text-primary transition-colors"
                         aria-label="LinkedIn"
                       >
-                        <Linkedin size={24} />
+                        <Linkedin size={22} />
                       </a>
                     );
                   }
@@ -304,7 +317,7 @@ export const Hero = () => {
                         className="text-muted-foreground hover:text-primary transition-colors"
                         aria-label="Email"
                       >
-                        <Mail size={24} />
+                        <Mail size={22} />
                       </a>
                     );
                   }
@@ -314,30 +327,28 @@ export const Hero = () => {
             )}
           </div>
 
-          {/* ========== RIGHT FEATURED PHOTO ========== */}
+          {/* ========== RIGHT FEATURED PHOTO (Desktop only) ========== */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative hidden lg:flex justify-end items-center"
+            className="relative hidden lg:flex justify-end items-center order-1 lg:order-2"
           >
             <div className="relative">
-              {/* Glow behind photo */}
               <div className="absolute -inset-8 bg-primary/20 rounded-full blur-3xl" />
 
               {profile?.avatar_url ? (
                 <img
                   src={profile.avatar_url}
                   alt={profile.name || "Profile photo"}
-                  className="relative w-[380px] h-[480px] object-cover rounded-2xl shadow-2xl border border-white/10"
+                  className="relative w-[360px] h-[460px] object-cover rounded-2xl shadow-2xl border border-white/10"
                 />
               ) : (
-                <div className="w-[380px] h-[480px] rounded-2xl bg-muted/50 flex items-center justify-center border border-white/10">
+                <div className="w-[360px] h-[460px] rounded-2xl bg-muted/50 flex items-center justify-center border border-white/10">
                   <span className="text-muted-foreground">No photo</span>
                 </div>
               )}
 
-              {/* Cinematic frame accent */}
               <div className="absolute -inset-3 border border-primary/30 rounded-2xl -z-10" />
             </div>
           </motion.div>
@@ -353,7 +364,7 @@ export const Hero = () => {
           document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })
         }
       >
-        <ArrowDown className="text-muted-foreground hover:text-primary transition-colors" size={28} />
+        <ArrowDown className="text-muted-foreground hover:text-primary transition-colors" size={26} />
       </motion.div>
     </section>
   );
