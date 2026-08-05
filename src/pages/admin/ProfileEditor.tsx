@@ -216,7 +216,7 @@ export const ProfileEditor = () => {
 
       setProfile({
         ...profile,
-        avatar_url: null,
+        avatar_url: undefined,
       });
 
       toast.success("Profile photo removed");

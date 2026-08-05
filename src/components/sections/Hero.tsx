@@ -57,7 +57,7 @@ export const Hero = () => {
     const texts = heroData.animated_texts;
     const currentText = texts[currentIndex];
 
-    let timeout: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout>;
 
     if (isTyping) {
       if (displayText.length < currentText.length) {
